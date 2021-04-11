@@ -1,5 +1,24 @@
 <?php
-include('connection.php');
+    //include('connection.php');
+    $isUserIn = false;
+    $db = new PDO('mysql:host=localhost;dbname=blog', 'sherlockholmes', 'kAwgwd3b9uD6KSGQ');
+    $get_accounts_stmt = $db->prepare('SELECT * FROM Users');
+
+    $get_accounts_stmt->execute();
+    $rows = $get_accounts_stmt->fetchAll();
+
+    $usernameEntered = '';
+    $passwordEntered = '';
+
+    if($_SERVER['REQUEST_METHOD']=='POST') {
+        $usernameEntered = $_REQUEST['username'];
+        $passwordEntered = $_REQUEST['pwd'];
+        foreach ($rows as $row) {
+            if($row['username']==$usernameEntered && $row['password']==$passwordEntered){
+                $isUserIn = true;
+            }
+        }
+        }
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -9,7 +28,9 @@ include('connection.php');
 	</head>
 	
 	<body>
-		<?php include('header.php'); ?>
+		<?php include('header.php');
+		    if($isUserIn==false){
+		?>
 		<!-- Show this part if user is not signed in yet -->
 		<div class="twocols">
 			<form action="index.php" method="post" class="twocols_col">
@@ -27,7 +48,7 @@ include('connection.php');
 						<input type="checkbox" name="remember" id="remember" checked />
 					</li>
 					<li>
-						<input type="submit" value="Submit" /> &nbsp; Not registered? <a href="register.php">Register</a>
+						<input type="submit" value="Submit" /> &nbsp;<?php if($usernameEntered!='' && $passwordEntered != '') print("Not registered?"); ?><a href="register.php">Register</a>
 					</li>
 				</ul>
 			</form>
@@ -36,7 +57,11 @@ include('connection.php');
 				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Consectetur libero nostrum consequatur dolor. Nesciunt eos dolorem enim accusantium libero impedit ipsa perspiciatis vel dolore reiciendis ratione quam, non sequi sit! Lorem ipsum dolor sit amet, consectetur adipisicing elit. Optio nobis vero ullam quae. Repellendus dolores quis tenetur enim distinctio, optio vero, cupiditate commodi eligendi similique laboriosam maxime corporis quasi labore!</p>
 			</div>
 		</div>
-		
+		<?php }?>
+        <?php if($isUserIn==true){
+                $_SESSION['username']=$usernameEntered;
+                $_SESSION['password']=$passwordEntered;
+            ?>
 		<!-- Show this part after user signed in successfully -->
 		<div class="logout_panel"><a href="register.php">My Profile</a>&nbsp;|&nbsp;<a href="index.php?logout=1">Log Out</a></div>
 		<h2>New Post</h2>
@@ -71,3 +96,4 @@ include('connection.php');
 		</div>
 	</body>
 </html>
+<?php }?>
